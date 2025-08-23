@@ -1,27 +1,27 @@
-name: Update CCNA Study Log
+name: Update Study Log
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # Runs daily at midnight UTC (adjust if needed)
+    - cron: "0 18 * * *"
+  workflow_dispatch:
 
 jobs:
   update-log:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Update study log
+      - name: Update log
         run: |
-          echo "$(date) - Updated study log" >> study-log.md
+          echo "$(date) - Learned CCNA topics" >> study_log.txt
 
-      - name: Commit and push changes
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add .
           git commit -m "Update study log" || echo "No changes to commit"
-          git pull --rebase origin main
           git push origin main

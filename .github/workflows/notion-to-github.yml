@@ -1,40 +1,27 @@
-name: update-log
+name: Update CCNA Study Log
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # daily at midnight, adjust if needed
-
-permissions:
-  contents: write   # allow github-actions[bot] to push
+    - cron: '0 0 * * *' # Runs daily at midnight UTC (adjust if needed)
 
 jobs:
   update-log:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0   # full history needed for rebase
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Fetch Notion Data
+      - name: Update study log
         run: |
-          echo "Fetching data from Notion..."
-          # your script to fetch data
+          echo "$(date) - Updated study log" >> study-log.md
 
-      - name: Convert Notion Data to Markdown
-        run: |
-          echo "Converting Notion data..."
-          # your script to convert data
-
-      - name: Commit and Push changes
+      - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Rebase to integrate any remote changes
-          git pull origin main --rebase || true
-
           git add .
           git commit -m "Update study log" || echo "No changes to commit"
+          git pull --rebase origin main
           git push origin main

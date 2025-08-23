@@ -3,22 +3,19 @@ name: update-log
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # runs daily at midnight (adjust if needed)
+    - cron: "0 0 * * *" # daily at midnight, adjust if needed
 
 permissions:
-  contents: write   # <-- allow pushing to repo
+  contents: write   # allow github-actions[bot] to push
 
 jobs:
   update-log:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up job
-        run: echo "Starting workflow..."
-
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0   # <-- required for pulling/rebasing
+          fetch-depth: 0   # full history needed for rebase
 
       - name: Fetch Notion Data
         run: |
@@ -30,20 +27,14 @@ jobs:
           echo "Converting Notion data..."
           # your script to convert data
 
-      - name: Commit and Push
+      - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Make sure we're up-to-date before pushing
+
+          # Rebase to integrate any remote changes
           git pull origin main --rebase || true
-          
+
           git add .
           git commit -m "Update study log" || echo "No changes to commit"
           git push origin main
-
-      - name: Post Checkout repo
-        run: echo "Post checkout steps complete."
-
-      - name: Complete job
-        run: echo "Workflow complete."

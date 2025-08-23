@@ -1,37 +1,44 @@
 name: Notion → GitHub Study Log
 
 on:
-  workflow_dispatch:
-
-permissions:
-  contents: write   # allow pushing commits to the repo
+  workflow_dispatch: # allow manual run
+  schedule:
+    - cron: "0 9 * * *" # runs every day at 9 AM (optional)
 
 jobs:
   update-log:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      # 2. Setup Node.js (adjust version if needed for your script)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: "18"
 
+      # 3. Install dependencies
       - name: Install dependencies
-        run: npm install @notionhq/client
+        run: npm install
 
-      - name: Run Notion → GitHub script
-        run: node .github/scripts/notion.js
+      # 4. Run Notion script to update study-log.md
+      - name: Update study log from Notion
+        run: node scripts/notion-to-github.js
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
 
-      - name: Commit & Push Changes
+      # 5. Commit & push changes
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add study-log.md
           git commit -m "Update study log from Notion" || echo "No changes to commit"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
